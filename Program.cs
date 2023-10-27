@@ -5,6 +5,8 @@ builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
+// builder.Services.AddSignalR();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -23,3 +25,6 @@ app.UseAuthorization();
 app.MapRazorPages();
 
 app.Run();
+
+
+
