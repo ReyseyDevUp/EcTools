@@ -19,5 +19,10 @@ namespace EcTools.Pages
         {
 
         }
+
+        public void OnPost()
+        {
+
+        }
     }
 }

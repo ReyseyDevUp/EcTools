@@ -1,0 +1,83 @@
+﻿@page
+@model FileToSQLModel
+
+@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    File Upload
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Choose a file:</label>
+                            <input type="file" name="file" id="file" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <input type="submit" value="Upload" class="btn btn-success" />
+                        </div>
+                    </form>
+                    @if (Model.Message != null)
+                    {
+                        <div class="alert alert-info mt-3">
+                            @Model.Message
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.dataLogs != null && Model.dataLogs.Any())
+    {
+        <div>
+            <div class="alert alert-danger mt-3">
+                There are discrepancies in the following lines: @string.Join(", ", Model.dataLogs)
+            </div>
+        </div>
+
+        <div class="alert alert-warning mt-3">
+            <form method="post" asp-page-handler="CorrectData">
+                Specify a default value for missing data: 
+                <input type="text" name="defaultValue" />
+                <input type="submit" value="Correct Data" class="btn btn-warning" />
+            </form>
+        </div>
+    }
+
+    @if (Model.columnNames != null && Model.columnNames.Any())
+    {
+        <div class="row">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        @foreach( var column in Model.columnNames)
+                        {
+                            <th scope="col"><div class="table-col-style">@column</div></th>
+                        }
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    @foreach( var data in Model.rows)
+                    {
+                        <tr>
+                            <td><div class="table-cell-style">X</div></td>
+                            @foreach (var data2 in data)
+                            {
+                            <td><div class="table-cell-style">@data2</div></td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

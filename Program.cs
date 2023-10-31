@@ -1,11 +1,22 @@
+using Microsoft.AspNetCore.Http.Features;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 
+// builder.Services.AddSignalR();
+
 var app = builder.Build();
 
-// builder.Services.AddSignalR();
+app.UseWhen(context => context.Request.Path.StartsWithSegments("/FileToSQL"), appBuilder =>
+{
+    appBuilder.Use(async (context, next) =>
+    {
+        context.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = 2L * 1024L * 1024L * 1024L; // 2 GB
+        await next.Invoke();
+    });
+});
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
