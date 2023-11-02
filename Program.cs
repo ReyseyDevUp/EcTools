@@ -18,6 +18,15 @@ app.UseWhen(context => context.Request.Path.StartsWithSegments("/FileToSQL"), ap
     });
 });
 
+app.UseWhen(context => context.Request.Path.StartsWithSegments("/ToSQL"), appBuilder =>
+{
+    appBuilder.Use(async (context, next) =>
+    {
+        context.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = 2L * 1024L * 1024L * 1024L; // 2 GB
+        await next.Invoke();
+    });
+});
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

@@ -56,24 +56,24 @@ namespace EcTools.Models
             return sql.ToString();
         }
 
-        private string SanitizeName(string name)
+        public static string SanitizeName(string name)
         {
             // Simple sanitization to remove invalid characters for SQL identifiers
             // This can be expanded based on specific requirements
             return name.Replace(" ", "_").Replace("-", "_").Replace(".", "_");
         }
 
-        private string SanitizeValue(string value)
+        public static string SanitizeValue(string value)
         {
             // Escape single quotes for SQL string literals
             return value.Replace("'", "''");
         }
 
-        public void SaveSqlToFile(string sql, string fileName)
+        public static void SaveSqlToFile(string sql, string fileName)
         {
             
             
-            var outputPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/outputs");
+            var outputPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/generatedSQL");
 
             if (!Directory.Exists(outputPath))
             {

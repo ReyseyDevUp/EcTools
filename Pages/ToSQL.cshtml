@@ -1,4 +1,267 @@
 ﻿@page
 @model EcTools.Pages.ToSQLModel
 @{
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    File Upload
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Choose a file:</label>
+                            <input type="file" name="file" id="file" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <button type="button" value="Upload" class="btn btn-success" onclick="uploadFile()">Upload</button>
+                        </div>
+                    </form>
+
+                    <div id="FileUploadStatus">
+                    </div>
+                    
+                    <div id="defaultValueFormContainer" class="card alert-warning" role="alert">
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3">
+                                <form id="defaultValueForm">
+                                    <div class="mb-3">
+                                        <label for="defaultValue" class="form-label">Type the default value for the empty fields</label>
+                                        <input type="text" class="form-control" id="defaultValue" name="defaultValue" placeholder="Enter default value">
+                                    </div>
+                                    <div class="mb-3">
+                                        <button type="button" class="btn btn-primary" onclick="setEmptyFieldsDefaultValue()">Apply</button>
+                                        <button type="button" class="btn btn-secondary" onclick="location.reload()">Quit</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="columnValuesFormContainer" class="card alert-warning" role="alert">
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3">
+                                <form id="columnValuesForm">
+                                    <div class="mb-3">
+                                        <label for="defaultValue" class="form-label">Type the default value for the empty fields</label>
+                                        <input type="text" class="form-control" id="defaultValue" name="defaultValue" placeholder="Enter default value">
+                                    </div>
+                                    <div class="mb-3">
+                                        <button type="button" class="btn btn-primary" onclick="setColumnFieldsValue()">Apply</button>
+                                        <button type="button" class="btn btn-secondary" onclick="location.reload()">Quit</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="fileDownload"></div>
+                    
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        var _fileName = "";
+        var _originalFileName ="";
+        $('#FileUploadStatus').hide();
+        $('#defaultValueFormContainer').hide();
+        $('#columnValuesFormContainer').hide();
+        $('#fileDownload').hide();
+        function uploadFile() {
+
+            $('#FileUploadStatus').hide();
+            $('#defaultValueFormContainer').hide();
+            $('#columnValuesFormContainer').hide();
+            $('#fileDownload').hide();
+
+            const fileInput = document.querySelector('input[type="file"]');
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('__RequestVerificationToken', token);
+            // Using RxJS To Handle The AJAX Request
+            rxjs.from(fetch('/ToSQL', {
+                method: 'POST',
+                body: formData
+            }))
+            .subscribe(response => {
+                if (response.ok) {
+                    response.json().then(data => {
+                        if (data.success) {
+                                console.log(data);
+
+                                _fileName           = data.filename;
+                                _originalFileName   = data.originalFileName
+
+                                $('#FileUploadStatus').html(`
+                                <div class="alert alert-success mt-3">
+                                            File <b>${data.originalFileName}</b> uploaded successfully.
+                                </div>`);
+                                $('#FileUploadStatus').slideDown();
+                                
+
+                                setTimeout((e)=>{
+                                    $('#FileUploadStatus').slideUp();
+                                    setTimeout((e)=>{
+                                        $('#fileDownload').html('');
+                                        $('#fileDownload').html(`
+                                                <div class="alert alert-info mt-3">
+                                                            Start Verifying The File <b>${data.originalFileName}</b>.
+                                                </div>
+                                        `);
+                                        $('#fileDownload').slideDown();
+                                    },300);  
+                                    console.log("Start Verifying The File");
+                                    verifyFile(data.filename);
+                                },2500);
+                        } else {
+                            console.log(data);
+
+                            $('#FileUploadStatus').html(`
+                            <div class="alert alert-danger mt-3">
+                                        File <b>${data.originalFileName}</b> not uploaded, try again.
+                            </div>`);
+                            $('#FileUploadStatus').slideDown();
+                        }
+                    });
+                } 
+                else {
+                    console.log('Error uploading file.');
+                }
+            });
+        }
+
+
+        function verifyFile(filename){
+            rxjs.from(fetch('/ToSQL?handler=VerifyCSV&filename=' + filename, {
+                method: 'GET'
+            }))
+            .subscribe(response =>{
+                if (response.ok) {
+                    response.json().then(data => {
+                        if(data.length > 0){
+                                console.log("WE HAVE SOME ISSUES");
+                                console.log(data);
+                                console.log(data[0].errorType);
+                                $('#FileUploadStatus').slideUp();
+                                if (data[0].errorType == "MORE_COLUMNS_THAN_DATA") {
+                                    setTimeout((e) => {
+                                        $('#FileUploadStatus').html('');
+                                        $('#FileUploadStatus').html(`
+                                        <div class="alert alert-danger mt-3">
+                                                  Verification done, The File <b>${_originalFileName}</b> is not valid.
+                                        </div>
+                                        `);
+                                        $('#FileUploadStatus').slideDown();
+                                        $('#defaultValueFormContainer').slideDown();
+                                    }, 2000);
+                                } else if (data[0].errorType == "MORE_DATA_THAN_COLUMNS") {
+                                    setTimeout((e) => {
+                                        $('#FileUploadStatus').html('');
+                                        $('#FileUploadStatus').html(`
+                                                <div class="alert alert-danger mt-3">
+                                                          Verification done, The File <b>${_originalFileName}</b> is not valid.
+                                                </div>
+                                                `);
+                                        $('#FileUploadStatus').slideDown();
+                                    }, 2000);
+                                }
+                                
+                        }else{
+                                console.log("ALL LINES ARE GOOD, FILE IS VALID");
+                                console.log(data);
+                                $('#FileUploadStatus').slideUp();
+                                setTimeout((e) => {
+                                    $('#FileUploadStatus').html('');
+                                    $('#FileUploadStatus').html(`
+                                    <div class="alert alert-success mt-3">
+                                         Verification done, The File <b>${_originalFileName}</b> is valid.
+                                    </div>
+                                    `);
+                                    $('#FileUploadStatus').slideDown();
+                                }, 2000);
+                        }
+                        
+                    });
+                }else{
+                    console.log('An Error Occured While Verifying The File.');
+                }
+            });
+        }
+
+        function setEmptyFieldsDefaultValue(){
+            const inputValue = document.getElementById('defaultValue').value;
+            rxjs.from(fetch('/ToSQL?handler=FieldsDefaultValueManager', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'RequestVerificationToken':document.querySelector('input[name="__RequestVerificationToken"]').value},
+                body: JSON.stringify({ defaultValue: inputValue, fileName: _fileName, originalFileName:_originalFileName })
+            }))
+            .subscribe(response =>{
+                if (response.ok) {
+                        response.json().then(data => {
+                            console.log('Successfully applied the default value.');
+
+                            $('#FileUploadStatus').slideUp();
+                            $('#defaultValueFormContainer').slideUp();
+                            setTimeout((e) => {
+                                $('#FileUploadStatus').html('');
+                                $('#FileUploadStatus').html(`
+                                <div class="d-flex flex-column align-items-center justify-content-center" style="height: 100vh;">
+                                    <h3 class="text-center mb-4">File Converted Successfully</h3>
+                                    <button class="btn btn-primary" onclick="downloadFile('fileName')">Download</button>
+                                </div>
+                                                    `);
+                                $('#FileUploadStatus').slideDown();
+                                $('#defaultValueFormContainer').slideDown();
+                            }, 2000);
+                        });
+                }else{
+                   console.error('Error applying default value.');
+                }
+            });
+        }
+
+        function setColumnFieldsValue(){
+            const inputValue = document.getElementById('defaultValue').value;
+            rxjs.from(fetch('/ToSQL?handler=ColumnsValueManager' + filename, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
+                body: JSON.stringify({ defaultValue: inputValue })
+            }))
+            .subscribe(response =>{
+                if (response.ok) {
+                        console.log('Successfully applied the default value.');
+                }else{
+                   console.error('Error applying default value.');
+                }
+            });
+        }
+
+        function downloadFile(fileNameDownload) {
+            rxjs.from(fetch('/ToSQL?handler=DownloadFile'))
+                .pipe(
+                    rxjs.operators.switchMap(response => response.blob())
+                )
+                .subscribe(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileNameDownload;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                });
+        }
+
+    </script>
 }
