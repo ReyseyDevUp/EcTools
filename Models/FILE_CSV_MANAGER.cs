@@ -6,7 +6,7 @@ namespace EcTools.Models
 {
     public class FILE_CSV_MANAGER
     {
-        public static void csvToSQL(string fileName, string originalFileName)
+        public static void      csvToSQL(string fileName, string originalFileName)
         {
             // SQL SCRIPT
             StringBuilder sql = new StringBuilder();
@@ -107,7 +107,7 @@ namespace EcTools.Models
             // SHOULD RETURN THE FILE NAME OF THE SQL VERSION.
         }
 
-        public static void csvToSQLWithDefaultValus(string fileName, string originalFileName, string defaultFieldValue)
+        public static string    csvToSQLWithDefaultValus(string fileName, string originalFileName, string defaultFieldValue)
         {
             // SQL SCRIPT
             StringBuilder sql = new StringBuilder();
@@ -202,13 +202,14 @@ namespace EcTools.Models
                 lineNumber++;
             }
 
-            SqlGenerator.SaveSqlToFile(sql.ToString(), SqlGenerator.SanitizeName(fileName));
+            string sqlFileName = SqlGenerator.SaveSqlToFile(sql.ToString(), SqlGenerator.SanitizeName(originalFileName));
 
             // new SqlGenerator().GenerateSql(orginalFileName, columnNames, rows);
             // SHOULD RETURN THE FILE NAME OF THE SQL VERSION.
+            return sqlFileName;
         }
 
-        public static void csvToSQLWithNewColumns(string fileName, string originalFileName)
+        public static string    csvToSQLWithNewColumns(List<string> columnsList, string fileName, string originalFileName)
         {
             // SQL SCRIPT
             StringBuilder sql = new StringBuilder();
@@ -234,7 +235,7 @@ namespace EcTools.Models
 
 
             // Create table
-            sql.AppendLine($"CREATE TABLE Table_{SqlGenerator.SanitizeName(fileName)} (");
+            sql.AppendLine($"CREATE TABLE Table_{SqlGenerator.SanitizeName(originalFileName)} (");
 
             while (!reader.EndOfStream)
             {
@@ -246,9 +247,17 @@ namespace EcTools.Models
                 if (lineNumber == 0)
                 {
                     // First line contains column names
-                    columnNames = Tools.UpdateDuplicates(Tools.ReplaceSpecialCharacters(values).ToArray());
-                    columnsCount = values.Length;
+                    
+                    var columnNamesList = values.ToList();
 
+                    foreach (string colName in columnsList)
+                    {
+                        columnNamesList.Add(colName);
+                    }
+
+                    values = columnNamesList.ToArray();
+                    columnsCount = values.Length;
+                    columnNames = Tools.UpdateDuplicates(Tools.ReplaceSpecialCharacters(values).ToArray());
                     foreach (var column in columnNames)
                     {
                         sql.AppendLine($"    [{SqlGenerator.SanitizeName(column)}] VARCHAR(MAX) NULL,");
@@ -278,7 +287,7 @@ namespace EcTools.Models
                     }
 
 
-                    sql.Append($"INSERT INTO {SqlGenerator.SanitizeName(fileName)}Table (");
+                    sql.Append($"INSERT INTO Table_{SqlGenerator.SanitizeName(originalFileName)} (");
 
                     foreach (var column in columnNames)
                     {
@@ -303,10 +312,11 @@ namespace EcTools.Models
                 lineNumber++;
             }
 
-            SqlGenerator.SaveSqlToFile(sql.ToString(), SqlGenerator.SanitizeName(fileName));
+            string sqlFileName = SqlGenerator.SaveSqlToFile(sql.ToString(), SqlGenerator.SanitizeName(originalFileName));
 
             // new SqlGenerator().GenerateSql(orginalFileName, columnNames, rows);
             // SHOULD RETURN THE FILE NAME OF THE SQL VERSION.
+            return sqlFileName;
         }
     }
 }

@@ -44,16 +44,8 @@
 
                     <div id="columnValuesFormContainer" class="card alert-warning" role="alert">
                         <div class="row">
-                            <div class="col-md-6 offset-md-3">
-                                <form id="columnValuesForm">
-                                    <div class="mb-3">
-                                        <label for="defaultValue" class="form-label">Type the default value for the empty fields</label>
-                                        <input type="text" class="form-control" id="defaultValue" name="defaultValue" placeholder="Enter default value">
-                                    </div>
-                                    <div class="mb-3">
-                                        <button type="button" class="btn btn-primary" onclick="setColumnFieldsValue()">Apply</button>
-                                        <button type="button" class="btn btn-secondary" onclick="location.reload()">Quit</button>
-                                    </div>
+                            <div class="col-md-12">
+                                <form id="columnValuesForm">                                    
                                 </form>
                             </div>
                         </div>
@@ -72,10 +64,13 @@
     <script>
         var _fileName = "";
         var _originalFileName ="";
+        var _missingColumnsCount = 0;
+
         $('#FileUploadStatus').hide();
         $('#defaultValueFormContainer').hide();
         $('#columnValuesFormContainer').hide();
         $('#fileDownload').hide();
+
         function uploadFile() {
 
             $('#FileUploadStatus').hide();
@@ -149,9 +144,7 @@
                 if (response.ok) {
                     response.json().then(data => {
                         if(data.length > 0){
-                                console.log("WE HAVE SOME ISSUES");
                                 console.log(data);
-                                console.log(data[0].errorType);
                                 $('#FileUploadStatus').slideUp();
                                 if (data[0].errorType == "MORE_COLUMNS_THAN_DATA") {
                                     setTimeout((e) => {
@@ -163,16 +156,43 @@
                                         `);
                                         $('#FileUploadStatus').slideDown();
                                         $('#defaultValueFormContainer').slideDown();
+                                        $('#fileDownload').slideUp();
                                     }, 2000);
                                 } else if (data[0].errorType == "MORE_DATA_THAN_COLUMNS") {
+
+                                    _missingColumnsCount = data[0].missingColumnsCount;
+
                                     setTimeout((e) => {
                                         $('#FileUploadStatus').html('');
                                         $('#FileUploadStatus').html(`
                                                 <div class="alert alert-danger mt-3">
-                                                          Verification done, The File <b>${_originalFileName}</b> is not valid.
+                                                    Verification done, The File <b>${_originalFileName}</b> is not valid.
+                                                    <br>
+                                                            The File <b>${_originalFileName}</b> has ${_missingColumnsCount} missing columns.
                                                 </div>
                                                 `);
                                         $('#FileUploadStatus').slideDown();
+                                        $('#fileDownload').slideUp();
+                                      
+                                        $('#columnValuesForm').html(``);
+                                        var clInputs = "";
+                                        for(var i = 1 ; i <= _missingColumnsCount ; i++){
+                                            clInputs += `
+                                                <div class="alert row">
+                                                    <label class="col-3 d-inline-flex p-2 bd-highlight" for="columnName${i}">Colonne N°${i}</label>
+                                                    <div class="col-8 "> <input type="text" class="form-control" placeholder="Enter column's name" id="columnName${i}" name="columnName${i}"></div>
+                                                </div>
+                                            `;
+                                        }
+
+                                        clInputs +=`
+                                        <div class="d-grid gap-2 d-md-flex">
+                                          <button type="button" onclick="setColumnFieldsValue()" class="btn btn-primary p-2 w-100 bd-highlight">Apply</button>
+                                          <button type="button" onclick="location.reload()" class="btn btn-secondary p-2 flex-shrink-1 bd-highlight">Quit</button>
+                                        </div>
+                                        `;
+                                        $('#columnValuesForm').html(clInputs);
+                                        $('#columnValuesFormContainer').slideDown();
                                     }, 2000);
                                 }
                                 
@@ -208,21 +228,23 @@
             .subscribe(response =>{
                 if (response.ok) {
                         response.json().then(data => {
-                            console.log('Successfully applied the default value.');
+                            
+                            console.log(data.message);
 
                             $('#FileUploadStatus').slideUp();
                             $('#defaultValueFormContainer').slideUp();
                             setTimeout((e) => {
                                 $('#FileUploadStatus').html('');
                                 $('#FileUploadStatus').html(`
-                                <div class="d-flex flex-column align-items-center justify-content-center" style="height: 100vh;">
-                                    <h3 class="text-center mb-4">File Converted Successfully</h3>
-                                    <button class="btn btn-primary" onclick="downloadFile('fileName')">Download</button>
-                                </div>
-                                                    `);
+                                    <div class="alert alert-success mt-3">
+                                        ${data.message}
+                                    </div>
+                                    <div class="d-flex flex-column align-items-center justify-content-center">
+                                        <button class="btn btn-primary" onclick="downloadFile('${data.sqlFileName}')">Download [${data.sqlFileName}]</button>
+                                    </div>
+                                                        `);
                                 $('#FileUploadStatus').slideDown();
-                                $('#defaultValueFormContainer').slideDown();
-                            }, 2000);
+                            }, 2000);                            
                         });
                 }else{
                    console.error('Error applying default value.');
@@ -231,23 +253,67 @@
         }
 
         function setColumnFieldsValue(){
-            const inputValue = document.getElementById('defaultValue').value;
-            rxjs.from(fetch('/ToSQL?handler=ColumnsValueManager' + filename, {
+            const formData = {};
+            const formElement = document.getElementById('columnValuesForm');
+            for (let element of formElement.elements) {
+                if (element.name) {
+                    formData[element.name] = element.value;
+                }
+            }
+
+            formData.__fileName          = _fileName;
+            formData.__originalFileName  = _originalFileName;
+
+
+
+            rxjs.from(fetch('/ToSQL?handler=ColumnsValueManager', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
-                body: JSON.stringify({ defaultValue: inputValue })
+                body: JSON.stringify(formData)
             }))
             .subscribe(response =>{
                 if (response.ok) {
-                        console.log('Successfully applied the default value.');
+                        response.json().then(data => {
+                            console.log(data.message);
+                            $('#columnValuesFormContainer').slideUp();
+                            $('#FileUploadStatus').slideUp();
+                            setTimeout((e) => {
+                                $('#FileUploadStatus').html('');
+                                $('#FileUploadStatus').html(`
+                                <div class="alert alert-success mt-3">
+                                    ${data.message}
+                                </div>
+                                <div class="d-flex flex-column align-items-center justify-content-center">
+                                    <button class="btn btn-primary" onclick="downloadFile('${data.sqlFileName}')">Download [${data.sqlFileName}]</button>
+                                </div>
+                                `);
+                                $('#FileUploadStatus').slideDown();
+                            }, 2000);
+                        });
+                    
                 }else{
-                   console.error('Error applying default value.');
+                    console.error('Error adding the new columns.');
+                    $('#columnValuesFormContainer').slideUp();
+                    $('#FileUploadStatus').slideUp();
+                    setTimeout((e) => {
+                        $('#FileUploadStatus').html('');
+                        $('#FileUploadStatus').html(`
+                        <div class="alert alert-danger mt-3">
+                            Error adding the new columns.
+                        </div>
+                        `);
+                        $('#FileUploadStatus').slideDown();
+                    }, 2000);
                 }
             });
         }
 
         function downloadFile(fileNameDownload) {
-            rxjs.from(fetch('/ToSQL?handler=DownloadFile'))
+            rxjs.from(fetch('/ToSQL?handler=DownloadFile',{
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
+                body: JSON.stringify({ sqlFileName: fileNameDownload})
+                }))
                 .pipe(
                     rxjs.operators.switchMap(response => response.blob())
                 )

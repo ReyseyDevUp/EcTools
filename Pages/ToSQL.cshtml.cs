@@ -20,6 +20,7 @@ namespace EcTools.Pages
         public int RowId { get; set; } = 0;
         public string[] columnNames { get; set; }
         public int columnsCount { get; set; }
+        public int missingColumnsCount { get; set; }
         public List<string[]> rows { get; set; } = new List<string[]>();
         public bool FileIsValid = false;
         public List<CSV_ERROR> csvErrorList { get; set; } = new List<CSV_ERROR>();
@@ -67,7 +68,6 @@ namespace EcTools.Pages
                             var entryFileName = entry.Name;
                             
 
-
                             if (entryFileName.EndsWith(".csv") || entryFileName.EndsWith(".xls") || entryFileName.EndsWith(".xlsx"))
                             {
                                 var buffer = new byte[4096];
@@ -75,7 +75,7 @@ namespace EcTools.Pages
                                 {
                                     CurrentFile = zipStream;
                                     
-                                    FileName = guid + entryFileName;
+                                    FileName = entryFileName;
 
                                     using (var entryStream = new FileStream(Path.Combine(uploads, guid + entryFileName), FileMode.Create))
                                     {
@@ -175,15 +175,17 @@ namespace EcTools.Pages
                                 // CASE IF THIS HEPPEN WITHIN THE 2,3,4 LINES MEANS THAT THE DATA IS CORRECT AND COLUMNS NAMES ARE MISSING
                                 // CASE IF THIS HAPPEN WITHIN THE 2 BUT NOT IN THE OTHER LINES IT MEANS THAT THE DATA VULES IS WRONG.
 
+
                                 _logger.LogInformation($"values.Length({values.Length}) > columnsCount({columnsCount})");
                                 rows.Add(values);
 
-                                 csvErrorList.Add(new CSV_ERROR(
+                                csvErrorList.Add(new CSV_ERROR(
                                           "MORE_DATA_THAN_COLUMNS"
                                         , "We have more data in this line than the available or defined columns"
                                         , RowId
                                         , values
                                         , columnNames
+                                        , (values.Length - columnsCount)
                                         ));
 
                                 return csvErrorList;
@@ -217,7 +219,6 @@ namespace EcTools.Pages
                                 _logger.LogInformation(line);
                                 _logger.LogInformation("Rows Data Columns Count: " + values.Length);
                             }
-
                         }
                     } else
                     {
@@ -229,7 +230,6 @@ namespace EcTools.Pages
                 }
             return csvErrorList;
         }
-
 
         public async Task<IActionResult> OnPostFieldsDefaultValueManager()
         {
@@ -243,6 +243,7 @@ namespace EcTools.Pages
             {
                 return new BadRequestObjectResult(new { success = false, message = "defaultValue not provided." });
             }
+
             if (!jsonDocument.RootElement.TryGetProperty("fileName", out var fileName))
             {
                 return new BadRequestObjectResult(new { success = false, message = "fileName not provided." });
@@ -256,14 +257,70 @@ namespace EcTools.Pages
             isEmptyFieldsValue  = true;
             EmptyFieldsValue    = defaultValueElement.GetString();
 
-            FILE_CSV_MANAGER.csvToSQLWithDefaultValus(fileName.GetString(), originalFileName.GetString(), defaultValueElement.GetString());
+            string sqlFileName = FILE_CSV_MANAGER.csvToSQLWithDefaultValus(fileName.GetString(), originalFileName.GetString(), defaultValueElement.GetString());
 
-            return new JsonResult(new { success = true, message = "Default value applied successfully.", filename = fileName.GetString() });
+            return new JsonResult(new { success = true, message = $"File <b>{originalFileName}</b> Converted to SQL Successfully", sqlFileName = sqlFileName });
         }
 
-        public IActionResult OnPostColumnsValueManager()
+        public async Task<IActionResult> OnPostColumnsValueManager()
         {
-            return new JsonResult(new { success = true, message = "DEV MODE" });
+            var body = await new StreamReader(Request.Body).ReadToEndAsync();
+            var formData = JsonSerializer.Deserialize<Dictionary<string, string>>(body);
+
+            if (!formData.TryGetValue("__fileName", out string fileName))
+            {
+                return new BadRequestObjectResult(new { success = false, message = "fileName not provided." });
+            }
+            if (!formData.TryGetValue("__originalFileName", out string originalFileName))
+            {
+                return new BadRequestObjectResult(new { success = false, message = "originalFileName not provided." });
+            }
+
+            List<string> _columns = new List<string>();
+
+            foreach (var item in formData)
+            {
+                // string columnName = item.Key;
+                // string columnValue = item.Value;
+                if (!item.Key.ToString().StartsWith("__"))
+                {
+                    _columns.Add(item.Value.ToString());
+                }
+                
+            }
+
+
+            string sqlFileName = FILE_CSV_MANAGER.csvToSQLWithNewColumns(_columns, fileName, originalFileName);
+
+            return new JsonResult(new { success = true, message = $"File <b>{originalFileName}</b> Converted to SQL Successfully", sqlFileName = sqlFileName });
+        }
+
+        public async Task<IActionResult> OnPostDownloadFile()
+        {
+
+            // Read the request body asynchronously
+            using var reader = new StreamReader(Request.Body);
+            var body = await reader.ReadToEndAsync();
+
+            // Deserialize the JSON payload to get the defaultValue
+            var jsonDocument = JsonDocument.Parse(body);
+            if (!jsonDocument.RootElement.TryGetProperty("sqlFileName", out var SqlFileName))
+            {
+                return new BadRequestObjectResult(new { success = false, message = "SqlFileName not provided." });
+            }
+
+            var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "generatedSQL");
+            var filePath = Path.Combine(uploads, SqlFileName.ToString());
+
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(filePath, FileMode.Open))
+            {
+                stream.CopyTo(memory);
+            }
+            memory.Position = 0;
+
+
+            return File(memory, "application/octet-stream", Path.GetFileName(filePath));
         }
 
     }

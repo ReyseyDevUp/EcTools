@@ -60,7 +60,7 @@ namespace EcTools.Models
         {
             // Simple sanitization to remove invalid characters for SQL identifiers
             // This can be expanded based on specific requirements
-            return name.Replace(" ", "_").Replace("-", "_").Replace(".", "_");
+            return name.Trim().Replace(" ", "_").Replace("-", "_").Replace(".", "_");
         }
 
         public static string SanitizeValue(string value)
@@ -69,7 +69,7 @@ namespace EcTools.Models
             return value.Replace("'", "''");
         }
 
-        public static void SaveSqlToFile(string sql, string fileName)
+        public static string SaveSqlToFile(string sql, string fileName)
         {
             
             
@@ -80,9 +80,13 @@ namespace EcTools.Models
                 Directory.CreateDirectory(outputPath);
             }
 
-            string outputFile = Path.Combine(outputPath, $"{Guid.NewGuid().ToString()}_{fileName}.sql");
+            string sqlFileName = $"{Guid.NewGuid().ToString()}_{fileName}.sql";
+
+            string outputFile = Path.Combine(outputPath, sqlFileName);
 
             File.WriteAllText(outputFile, sql);
+
+            return sqlFileName;
         }
     }
 }
