@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Reflection.Emit;
 
 namespace EcTools.Pages
 {
     public class IndexModel : PageModel
     {
 
-        public string dev = "mehdi reysey";
+        public string dev = "Mehdi Reysey";
 
         private readonly ILogger<IndexModel> _logger;
 
@@ -17,12 +18,13 @@ namespace EcTools.Pages
 
         public void OnGet()
         {
-
+            Models.Lab.Main(_logger);
         }
 
         public void OnPost()
         {
 
         }
+
     }
 }

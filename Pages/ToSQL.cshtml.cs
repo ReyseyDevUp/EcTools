@@ -150,12 +150,17 @@ namespace EcTools.Pages
                 {
                     var line = reader.ReadLine();
                     string pattern = @"&\w+;";
-                    string cleaned = Regex.Replace(line, pattern, "");
-                    var values = cleaned.Split(';');
+                    string cleaned  = Regex.Replace(line, pattern, "");
+                    // FIND SEMICOLONES WITHIN HTML TAGS AND CONVERT THEM TO HTML CHAR CODE
+                    string output = Regex.Replace(cleaned, @"(?<=<[^>| ^/>]+>)([^</]+)([^</| <\w+/>]+)(?=<)", m => m.Value.Replace(";", ""));
+                    
+                    // var values = cleaned.Split(';');
+                    _logger.LogError(output);
+                    var values = Regex.Split(output, @";");
 
-                    // 
-                    // CSV_FileConfig cfg = new CSV_FileConfig()
-                    _logger.LogInformation($"FileName [{FileName}] values.Length[{values.Length}], rowsId[{RowId}]");
+                // 
+                // CSV_FileConfig cfg = new CSV_FileConfig()
+                _logger.LogInformation($"FileName [{FileName}] values.Length[{values.Length}], rowsId[{RowId}]");
                     // fileConfigs.Add(new CSV_FileConfig(orginalFileName, values.Length, rowsId, values));
                     if(lineNumber < 5)
                     {
@@ -229,6 +234,30 @@ namespace EcTools.Pages
                     RowId++;
                 }
             return csvErrorList;
+        }
+
+        public async Task<IActionResult> OnPostProcessValidFile()
+        {
+            // Read the request body asynchronously
+            using var reader = new StreamReader(Request.Body);
+            var body = await reader.ReadToEndAsync();
+
+            // Deserialize the JSON payload to get the defaultValue
+            var jsonDocument = JsonDocument.Parse(body);
+            
+            if (!jsonDocument.RootElement.TryGetProperty("fileName", out var fileName))
+            {
+                return new BadRequestObjectResult(new { success = false, message = "fileName not provided." });
+            }
+            if (!jsonDocument.RootElement.TryGetProperty("originalFileName", out var originalFileName))
+            {
+                return new BadRequestObjectResult(new { success = false, message = "originalFileName not provided." });
+            }
+
+
+            string sqlFileName = FILE_CSV_MANAGER.csvToSQL(fileName.GetString(), originalFileName.GetString());
+
+            return new JsonResult(new { success = true, message = $"File <b>{originalFileName}</b> Converted to SQL Successfully", sqlFileName = sqlFileName });
         }
 
         public async Task<IActionResult> OnPostFieldsDefaultValueManager()

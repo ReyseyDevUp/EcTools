@@ -6,12 +6,9 @@ namespace EcTools.Models
 {
     public class FILE_CSV_MANAGER
     {
-        public static void      csvToSQL(string fileName, string originalFileName)
+        public static string      csvToSQL(string fileName, string originalFileName)
         {
-            // SQL SCRIPT
-            StringBuilder sql = new StringBuilder();
-
-
+            
             // Construct the full path to the file in the uploads directory
             var _uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
             var filePath = Path.Combine(_uploads, fileName);
@@ -26,20 +23,27 @@ namespace EcTools.Models
             // Lists to store the column names and rows
             string[]    columnNames = null;
             var         rows = new List<string[]>();
-            int         rowsId = 0;
             int         columnsCount = 0;
             int         lineNumber = 0;
 
 
-            // Create table
-            sql.AppendLine($"CREATE TABLE Table_{SqlGenerator.SanitizeName(fileName)} (");
+            // SQL SCRIPT
+            StringBuilder sql = new StringBuilder();
+            string tableName = SqlGenerator.SanitizeName(originalFileName);
+            sql.AppendLine($"CREATE TABLE Table_{tableName} (");
+            string insertInto = $"INSERT INTO Table_{tableName} (";
+            StringBuilder insertIntoColumns = new StringBuilder();
+
 
             while (!reader.EndOfStream)
             {
                 var line = reader.ReadLine();
                 string pattern = @"&\w+;";
                 string cleaned = Regex.Replace(line, pattern, "");
-                var values = cleaned.Split(';');
+                // FIND SEMICOLONES WITHIN HTML TAGS AND CONVERT THEM TO HTML CHAR CODE
+                string output = Regex.Replace(cleaned, @"(?<=<[^>| ^/>]+>)([^</]+)([^</| <\w+/>]+)(?=<)", m => m.Value.Replace(";", ""));
+                //var values = cleaned.Split(';');
+                var values = Regex.Split(output, @"(?<!&semi)(?<!&nbsp);");
 
                 if (lineNumber == 0)
                 {
@@ -49,8 +53,18 @@ namespace EcTools.Models
 
                     foreach (var column in columnNames)
                     {
-                        sql.AppendLine($"    [{SqlGenerator.SanitizeName(column)}] VARCHAR(MAX) NULL,");
+                        string columnName = SqlGenerator.SanitizeName(column);
+                        sql.AppendLine($"    [{columnName}] VARCHAR(MAX) NULL,");
+                        insertIntoColumns.Append($"[{columnName}],");
                     }
+                    sql.Length -= 1;
+                    sql.AppendLine(")");
+                    sql.AppendLine("GO");
+                    sql.AppendLine("");
+
+                    insertIntoColumns.Length -= 1;
+                    insertIntoColumns.Append(") VALUES (");
+
                 }
                 else
                 {
@@ -75,17 +89,9 @@ namespace EcTools.Models
                         rows.Add(values);
                     }
 
-                    
-                    sql.Append($"INSERT INTO {SqlGenerator.SanitizeName(fileName)}Table (");
+                    sql.Append(insertInto);
 
-                    foreach (var column in columnNames)
-                    {
-                        sql.Append($"[{SqlGenerator.SanitizeName(column)}],");
-                    }
-
-                    // Remove the last comma and close the column names part
-                    sql.Length -= 1;
-                    sql.Append(") VALUES (");
+                    sql.Append(insertIntoColumns);
 
                     foreach (var value in values)
                     {
@@ -95,16 +101,12 @@ namespace EcTools.Models
                     // Remove the last comma and close the values part
                     sql.Length -= 1;
                     sql.AppendLine(");");
-                    
                 }
 
                 lineNumber++;
             }
 
-            SqlGenerator.SaveSqlToFile(sql.ToString(), SqlGenerator.SanitizeName(fileName));
-
-            // new SqlGenerator().GenerateSql(orginalFileName, columnNames, rows);
-            // SHOULD RETURN THE FILE NAME OF THE SQL VERSION.
+            return SqlGenerator.SaveSqlToFile(sql.ToString(), SqlGenerator.SanitizeName(originalFileName));
         }
 
         public static string    csvToSQLWithDefaultValus(string fileName, string originalFileName, string defaultFieldValue)
@@ -152,6 +154,11 @@ namespace EcTools.Models
                     {
                         sql.AppendLine($"    [{SqlGenerator.SanitizeName(column)}] VARCHAR(MAX) NULL,");
                     }
+                    sql.Length -= 1;
+                    sql.AppendLine(")");
+                    sql.AppendLine("GO");
+                    sql.AppendLine("");
+
                 }
                 else
                 {
@@ -258,10 +265,15 @@ namespace EcTools.Models
                     values = columnNamesList.ToArray();
                     columnsCount = values.Length;
                     columnNames = Tools.UpdateDuplicates(Tools.ReplaceSpecialCharacters(values).ToArray());
+
                     foreach (var column in columnNames)
                     {
                         sql.AppendLine($"    [{SqlGenerator.SanitizeName(column)}] VARCHAR(MAX) NULL,");
                     }
+                    sql.Length -= 1;
+                    sql.AppendLine(")");
+                    sql.AppendLine("GO");
+                    sql.AppendLine("");
                 }
                 else
                 {

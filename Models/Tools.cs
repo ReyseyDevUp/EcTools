@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace EcTools.Models
 {
@@ -10,6 +11,7 @@ namespace EcTools.Models
 
             foreach (var str in inputStrings)
             {
+                
                 string modifiedStr = str
                     .Replace('é', 'e')
                     .Replace('è', 'e')
@@ -32,6 +34,57 @@ namespace EcTools.Models
 
             return outputStrings;
 
+        }
+
+        public static string ReplaceSpecialCharacters(string _inputStrings)
+        {
+
+
+            string inputStrings = _inputStrings;
+
+            // Define replacements in a dictionary
+            var replacements = new Dictionary<string, string>
+        {
+            { "[éèêë]", "e" },
+            { "[àâä]", "a" },
+            { "ç", "c" },
+            { "[îï]", "i" },
+            { "[ôö]", "o" },
+            { "[ùûü]", "u" },
+            { "ÿ", "y" },
+            { "\\*", string.Empty },
+            { "@", "_AT_" },
+            { "\\)", string.Empty },
+            { "\\(", string.Empty },
+            { "\\[", string.Empty },
+            { "\\]", string.Empty },
+            { "\\.", string.Empty },
+            { "\\\\", string.Empty },
+            { "\\/", string.Empty },
+            { ":", string.Empty },
+            { ",", string.Empty },
+            { ";", string.Empty },
+            { "!", string.Empty },
+            { "[$€£%]", string.Empty },
+            { "\\^", string.Empty },
+            { "<", string.Empty },
+            { ">", string.Empty },
+            { "`", string.Empty },
+            { "'", " " },
+            { "|", string.Empty },
+            { "&", string.Empty },
+            { "=", string.Empty },
+        };
+
+            // Perform replacements
+            foreach (var replacement in replacements)
+            {
+                inputStrings = Regex.Replace(inputStrings, replacement.Key, replacement.Value);
+            }
+
+            Console.WriteLine(inputStrings);
+
+            return inputStrings.Trim();
         }
 
         public static string[] UpdateDuplicates(string[] array)

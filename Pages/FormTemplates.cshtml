@@ -1,0 +1,198 @@
+﻿@page
+@model EcTools.Pages.FormTemplatesModel
+@{
+    Layout = "_Layout";
+}
+
+<link rel="stylesheet" href="~/css/FormTemplates.css" />
+
+<div class="EC_MAIN_CONTENTS_CONTAINER">
+    <div class="EC_BANNER_CONTAINER">
+        <img src="~/media/images/ecBanner.png" alt="EC Tools Banner" />
+    </div>
+
+    <div class="EC_UPLOAD_FORM_CONTAINER">
+        <div class="EC_UPLOAD_FORM_IMAGE_CONTAINER">
+            <img src="~/media/images/uploadDocuments.png" alt="Form File Upload" />
+        </div>
+
+        <div class="EC_UPLOAD_FORM_INPUTS_CONTAINER">
+            <div class="EC_UPLOAD_FORM_INPUT_BROWSE_FILE_CONTAINER">
+                <label for="file" class="form-label">Choose a file:</label>
+                <input type="file" name="file" id="file" class="form-control" required />
+            </div>
+            <div class="EC_UPLOAD_FORM_INPUT_UPLOAD_FILE_CONTAINER">
+                <input type="submit" value="Upload" class="" />
+            </div>
+        </div>
+    </div>
+
+    <div class="EC_PROGRESS_BAR_CONTAINER">
+        <div class="wrapper">
+            <div class="progress-bar">
+                <div class="bar" data-size="20">
+                    <span class="perc"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="EC_PROCESS_STATUS_CONTAINER">
+
+        <div class="EC_PROCESS_WARNING_STATE_CONTAINER EC_WARNING">
+            <div class="EC_PROCESS_WARNING_STATE_HEADER_CONTAINER">
+                <div class="EC_PROCESS_WARNING_STATE_HEADER_ICON_CONTAINER">
+                    <img src="~/media/images/warning.png" alt="WARNING: " />
+                </div>
+                <div class="EC_PROCESS_WARNING_STATE_HEADER_TITLE_CONTAINER">
+                    <h1>WARNING TYPE LABEL</h1>
+                </div>
+            </div>
+            <div class="EC_PROCESS_WARNING_STATE_BODY_CONTAINER">
+                <p>
+                    Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem 
+                    Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="EC_PROCESS_STATUS_CONTAINER">
+
+        <div class="EC_PROCESS_SUCCESS_STATE_CONTAINER EC_WARNING">
+            <div class="EC_PROCESS_SUCCESS_STATE_HEADER_CONTAINER">
+                <div class="EC_PROCESS_SUCCESS_STATE_HEADER_ICON_CONTAINER">
+                    <img src="~/media/images/check.png" alt="WARNING: " />
+                </div>
+                <div class="EC_PROCESS_SUCCESS_STATE_HEADER_TITLE_CONTAINER">
+                    <h1>SUCCESS TYPE LABEL</h1>
+                </div>
+            </div>
+            <div class="EC_PROCESS_SUCCESS_STATE_BODY_CONTAINER">
+                <p>
+                    Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem
+                    Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="EC_PROCESS_STATUS_CONTAINER" class="EC_PROCESS_STATUS_CONTAINER">
+
+        <div class="EC_PROCESS_ERROR_STATE_CONTAINER EC_WARNING">
+            <div class="EC_PROCESS_ERROR_STATE_HEADER_CONTAINER">
+                <div class="EC_PROCESS_ERROR_STATE_HEADER_ICON_CONTAINER">
+                    <img src="~/media/images/check.png" alt="WARNING: " />
+                </div>
+                <div class="EC_PROCESS_ERROR_STATE_HEADER_TITLE_CONTAINER">
+                    <h1>ERROR TYPE LABEL</h1>
+                </div>
+            </div>
+            <div class="EC_PROCESS_ERROR_STATE_BODY_CONTAINER">
+                <p>
+                    Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem
+                    Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem Lorem
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="EC_UPDATE_COLUMNS_NAMES_FORM_CONTAINER">
+        <div class="EC_UPDATE_COLUMNS_NAMES_FORM_IMAGE_CONTAINER">
+            <img src="~/media/images/uploadDocuments.png" alt="Form File Upload" />
+        </div>
+
+        <div class="EC_UPDATE_COLUMNS_NAMES_FORM_INPUTS_FIElD_CONTAINER">
+            <div class="EC_UPDATE_COLUMNS_NAMES_FORM_INPUTS_CONTAINER">
+                <div class="EC_UPDATE_COLUMNS_NAMES_FORM_INPUT_CONTAINER">
+                    <label for="column_1" class="form-label">Column 1:</label>
+                    <input type="text" name="columnValue_1" id="column_1" class="" placeholder="Column Value" required />
+                </div>
+
+                <div class="EC_UPDATE_COLUMNS_NAMES_FORM_INPUT_CONTAINER">
+                    <label for="column_2" class="form-label">Column 2:</label>
+                    <input type="text" name="columnValue_2" id="column_2" class="" placeholder="Column Value" required />
+                </div>
+
+                <div class="EC_UPDATE_COLUMNS_NAMES_FORM_INPUT_CONTAINER">
+                    <label for="column_3" class="form-label">Column 3:</label>
+                    <input type="text" name="columnValue_3" id="column_3" class="" placeholder="Column Value" required />
+                </div>
+
+                <div class="EC_UPDATE_COLUMNS_NAMES_FORM_INPUT_CONTAINER">
+                    <label for="column_4" class="form-label">Column 4:</label>
+                    <input type="text" name="columnValue_4" id="column_4" class="" placeholder="Column Value" required />
+                </div>
+
+                <div class="EC_UPDATE_COLUMNS_NAMES_FORM_INPUT_CONTAINER">
+                    <label for="column_5" class="form-label">Column 5:</label>
+                    <input type="text" name="columnValue_5" id="column_5" class="" placeholder="Column Value" required />
+                </div>
+
+                <div class="EC_UPDATE_COLUMNS_NAMES_FORM_INPUT_CONTAINER">
+                    <label for="column_5" class="form-label">Column 5:</label>
+                    <input type="text" name="columnValue_5" id="column_5" class="" placeholder="Column Value" required />
+                </div>
+            </div>
+            
+            <div class="EC_UPDATE_COLUMNS_NAMES_FORM_INPUT_UPDATE_DATA_CONTAINER">
+                <input type="submit" value="UPDATE" class="" />
+            </div>
+        </div>
+    </div>
+    
+    <div class="EC_UPDATE_FIELD_VALUES_FORM_CONTAINER">
+        <div class="EC_UPDATE_COLUMNS_NAMES_FORM_IMAGE_CONTAINER">
+            <img src="~/media/images/uploadDocuments.png" alt="Form File Upload" />
+        </div>
+
+        <div class="EC_UPDATE_FIELD_VALUES_FORM_INPUTS_FIElD_CONTAINER">
+            <div class="EC_UPDATE_FIELD_VALUES_FORM_INPUTS_CONTAINER">
+                <div class="EC_UPDATE_FIELD_VALUES_FORM_INPUT_CONTAINER">
+                    <label for="column_1" class="form-label">Column 1:</label>
+                    <input type="text" name="columnValue_1" id="column_1" class="" placeholder="Column Value" required />
+                </div>
+
+                <div class="EC_UPDATE_FIELD_VALUES_FORM_INPUT_CONTAINER">
+                    <label for="column_2" class="form-label">Column 2:</label>
+                    <input type="text" name="columnValue_2" id="column_2" class="" placeholder="Column Value" required />
+                </div>
+
+                <div class="EC_UPDATE_FIELD_VALUES_FORM_INPUT_CONTAINER">
+                    <label for="column_3" class="form-label">Column 3:</label>
+                    <input type="text" name="columnValue_3" id="column_3" class="" placeholder="Column Value" required />
+                </div>
+
+                <div class="EC_UPDATE_FIELD_VALUES_FORM_INPUT_CONTAINER">
+                    <label for="column_4" class="form-label">Column 4:</label>
+                    <input type="text" name="columnValue_4" id="column_4" class="" placeholder="Column Value" required />
+                </div>
+
+                <div class="EC_UPDATE_FIELD_VALUES_FORM_INPUT_CONTAINER">
+                    <label for="column_5" class="form-label">Column 5:</label>
+                    <input type="text" name="columnValue_5" id="column_5" class="" placeholder="Column Value" required />
+                </div>
+
+                <div class="EC_UPDATE_FIELD_VALUES_FORM_INPUT_CONTAINER">
+                    <label for="column_5" class="form-label">Column 5:</label>
+                    <input type="text" name="columnValue_5" id="column_5" class="" placeholder="Column Value" required />
+                </div>
+            </div>
+
+            <div class="EC_UPDATE_FIELD_VALUES_FORM_INPUT_UPDATE_DATA_CONTAINER">
+                <input type="submit" value="UPDATE" class="" />
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+@section Scripts{
+    <script src="~/js/FormTemplates.js"></script>
+}
+
+
+

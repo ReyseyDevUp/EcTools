@@ -4,19 +4,47 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome To EC-Tools</h1>
-    <p>Developer: @Model.dev</p>
+    <div class="EC_MAIN_CONTENTS_CONTAINER">
+        <div class="EC_BANNER_CONTAINER">
+            <img src="~/media/images/ecBanner.png" alt="EC Tools Banner" />
+        </div>
 
-    <section id="MR_MAIN_TOOLS" class="card">
-        <div class="card" style="width: 18rem;">
-            <img src="https://img.freepik.com/premium-vector/digital-document-logo-design-template_18099-2363.jpg" class="card-img-top" alt="Digital Document">
-            <div class="card-body">
-                <h5 class="card-title">FILE TO SQL</h5>
-                <p class="card-text">A quick tool to generate a SQL script from a given file's data.</p>
-                <a asp-page="FileToSQL" class="btn btn-primary">Go somewhere</a>
+        <div id="EC_TOOLS_DIV_CONTAINER">
+
+            <div class="EC_CARDS_CONTAINER">
+                <div class="EC_CARD_CONTAINER EC-CARD--V">
+                    <div class="EC_CARD_IMAGE_CONTAINER">
+                        <img src="~/media/images/csvToSQL.jpg" alt="CSV TO SQL" />
+                    </div>
+
+                    <div class="EC_CARD_DESCRIPTION_CONTAINER">
+                        <p>
+                            Convert CSV Files To SQL
+                        </p>
+                    </div>
+
+                    <div class="EC_CARD_BUTTON_CONTAINER">
+                        <a asp-area="" asp-page="/ToSQL">CSV TO SQL</a>
+                    </div>
+                </div>
+
+                <div class="EC_CARD_CONTAINER EC-CARD--V">
+                    <div class="EC_CARD_IMAGE_CONTAINER">
+                        <img src="~/media/images/xlsxToSQL.jpg" alt="CSV TO SQL" />
+                    </div>
+
+                    <div class="EC_CARD_DESCRIPTION_CONTAINER">
+                        <p>
+                            Convert XLSX Files To SQL
+                        </p>
+                    </div>
+
+                    <div class="EC_CARD_BUTTON_CONTAINER">
+                        <a asp-area="" asp-page="/xlsxToSQL">XLSX TO SQL</a>
+                    </div>
+                </div>
             </div>
         </div>
-    </section>
-    
-</div>
+        
+    </div>
+

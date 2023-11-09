@@ -1,0 +1,279 @@
+﻿@page
+@model EcTools.Pages.xlsxToSQLModel
+@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    File Upload
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Choose a file:</label>
+                            <input type="file" name="file" id="file" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <button type="button" value="Upload" id="EC_TOSQL_FORM_UPLOAD_BUTTON" class="EC_TOSQL_FORM_UPLOAD_BUTTON" onclick="uploadXlsxFile()" disabled>
+                                UPLOAD
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="FileUploadStatus">
+                    </div>
+
+                    <div id="defaultValueFormContainer" class="card alert-warning" role="alert">
+                        <div class="row">
+                            <div class="col-md-6 offset-md-3">
+                                <form id="defaultValueForm">
+                                    <div class="mb-3">
+                                        <label for="defaultValue" class="form-label">Type the default value for the empty fields</label>
+                                        <input type="text" class="form-control" id="defaultValue" name="defaultValue" placeholder="Enter default value">
+                                    </div>
+                                    <div class="mb-3">
+                                        <button type="button" class="btn btn-primary" onclick="setEmptyFieldsDefaultValue()">Apply</button>
+                                        <button type="button" class="btn btn-secondary" onclick="location.reload()">Quit</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="columnValuesFormContainer" class="card alert-warning" role="alert">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <form id="columnValuesForm">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="fileDownload" style=""></div>
+
+                    <div id="selectWorksheets" class="row" style="">
+                        <p>Choice a worksheet:</p>
+                        <select class="form-select" id="single-select-worksheet" data-placeholder="Choose one thing" style="width: 300px;padding: 0;">
+                        </select>
+                        <div class="col-4">
+                            <button type="button" class="btn btn-primary" onclick="processValidFile()" style="display: flex;width: 100%;justify-content: center;align-items: center;font-weight: 600;">Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        var _fileName = "";
+        var _originalFileName = "";
+        var _missingColumnsCount = 0;
+
+        $('#FileUploadStatus').hide();
+        $('#defaultValueFormContainer').hide();
+        $('#columnValuesFormContainer').hide();
+        $('#fileDownload').hide();
+        $('#selectWorksheets').hide();
+
+        $('#file').change((event) => {
+            if (event.target.files.length > 0) {
+                $('#EC_TOSQL_FORM_UPLOAD_BUTTON').prop('disabled', false);
+            } else {
+                $('#EC_TOSQL_FORM_UPLOAD_BUTTON').prop('disabled', true);
+            }
+        });
+
+        function uploadXlsxFile() {
+
+            $('#FileUploadStatus').hide();
+            $('#defaultValueFormContainer').hide();
+            $('#columnValuesFormContainer').hide();
+            $('#fileDownload').hide();
+            $('#selectWorksheets').hide();
+
+            const fileInput = document.querySelector('input[type="file"]');
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('__RequestVerificationToken', token);
+
+            $('#EC_TOSQL_FORM_UPLOAD_BUTTON').html(`
+                        <div id="EC_TOSQL_FORM_UPLOAD_BUTTON_SPINNER" class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    `);
+
+            // Using RxJS To Handle The AJAX Request
+            rxjs.from(fetch('/xlsxToSQL', {
+                method: 'POST',
+                body: formData
+            }))
+                .subscribe(response => {
+                    if (response.ok) {
+                        response.json().then(data => {
+                            if (data.success) {
+                                console.log(data);
+
+                                _fileName = data.filename;
+                                _originalFileName = data.originalFileName
+
+                                $('#FileUploadStatus').html(`
+                                        <div class="alert alert-success mt-3">
+                                                    File <b>${data.originalFileName}</b> uploaded successfully.
+                                        </div>`);
+                                $('#FileUploadStatus').slideDown();
+
+
+                                setTimeout((e) => {
+                                    $('#FileUploadStatus').slideUp();
+                                    setTimeout((e) => {
+                                        $('#fileDownload').html('');
+                                        $('#fileDownload').html(`
+                                                        <div class="alert alert-info mt-3">
+                                                                    Start Verifying The File <b>${data.originalFileName}</b>.
+                                                        </div>
+                                                `);
+                                        $('#fileDownload').slideDown();
+                                    }, 300);
+                                    console.log("Start Verifying The File");
+                                    getWorksheetsNames(data.filename);
+                                }, 2500);
+                            } else {
+                                console.log(data);
+
+                                $('#FileUploadStatus').html(`
+                                    <div class="alert alert-danger mt-3">
+                                                File <b>${data.originalFileName}</b> not uploaded, try again.
+                                    </div>`);
+                                $('#FileUploadStatus').slideDown();
+                                $('#EC_TOSQL_FORM_UPLOAD_BUTTON').html(`UPLOAD`);
+                            }
+                        });
+                    }
+                    else {
+                        console.log('Error uploading file.');
+                        $('#EC_TOSQL_FORM_UPLOAD_BUTTON').html(`UPLOAD`);
+                    }
+                });
+        }
+
+
+        function getWorksheetsNames(filename) {
+            rxjs.from(fetch('/xlsxToSQL?handler=FileWorksheets&filename=' + filename, {
+                method: 'GET'
+            }))
+                .subscribe(response => {
+                    if (response.ok) {
+                        response.json().then(data => {
+                            if (data.length > 0) {
+
+                                console.log("ALL LINES ARE GOOD, FILE IS VALID");
+                                console.log(data);
+                                $('#FileUploadStatus').slideUp();
+                                setTimeout((e) => {
+                                    $('#FileUploadStatus').html('');
+                                    $('#FileUploadStatus').html(`
+                                        <div class="alert alert-success mt-3">
+                                            Verification done, The File <b>${_originalFileName}</b> is valid.
+                                        </div>
+                                    `);
+                                    $('#fileDownload').slideUp();
+
+                                    var options = [];
+                                    data.map((v,i)=>{
+                                        console.log(v,i);
+                                        options.push({id: i, text: v});
+                                    });
+
+                                    var $select = $('#single-select-worksheet');
+
+                                    $.each(options, function (index, item) {
+                                        var option = new Option(item.text, item.id, false, false);
+                                        $select.append(option);
+                                    });
+
+                                    $('#selectWorksheets').slideDown();
+
+                                    $('#single-select-worksheet').select2({
+                                        theme: "bootstrap-5",
+                                        width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
+                                        placeholder: $( this ).data( 'placeholder' ),
+                                    } );
+
+                                    $select.select2();
+
+                                    $('#FileUploadStatus').slideDown();
+                                }, 2000);
+                            }
+
+                        });
+                    } else {
+                        console.log('An Error Occured While Verifying The File.');
+                        $('#EC_TOSQL_FORM_UPLOAD_BUTTON').html(`UPLOAD`);
+                    }
+                });
+        }
+
+        function processValidFile() {
+            rxjs.from(fetch('/xlsxToSQL?handler=ProcessValidFile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
+                body: JSON.stringify({ fileName: _fileName, originalFileName: _originalFileName, worksheetIndex: $('#single-select-worksheet').val()})
+            }))
+                .subscribe(response => {
+                    if (response.ok) {
+                        response.json().then(data => {
+
+                            console.log(data.message);
+
+                            $('#FileUploadStatus').slideUp();
+                            $('#defaultValueFormContainer').slideUp();
+                            setTimeout((e) => {
+                                $('#FileUploadStatus').html('');
+                                $('#FileUploadStatus').html(`
+                                                    <div class="alert alert-success mt-3">
+                                                        ${data.message}
+                                                    </div>
+                                                    <div class="d-flex flex-column align-items-center justify-content-center">
+                                                        <button class="btn btn-primary" onclick="downloadFile('${data.sqlFileName}')">Download [${data.sqlFileName}]</button>
+                                                    </div>
+                                                                        `);
+                                $('#FileUploadStatus').slideDown();
+                                $('#EC_TOSQL_FORM_UPLOAD_BUTTON').html(`UPLOAD`);
+                            }, 2000);
+                        });
+                    } else {
+                        console.error('Error applying default value.');
+                    }
+                });
+        }
+
+        function downloadFile(fileNameDownload) {
+            rxjs.from(fetch('/ToSQL?handler=DownloadFile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
+                body: JSON.stringify({ sqlFileName: fileNameDownload })
+            }))
+                .pipe(
+                    rxjs.operators.switchMap(response => response.blob())
+                )
+                .subscribe(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileNameDownload;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                });
+        }
+
+    </script>
+}

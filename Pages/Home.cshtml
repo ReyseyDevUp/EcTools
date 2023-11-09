@@ -1,0 +1,52 @@
+﻿@page
+@model EcTools.Pages.HomeModel
+@{
+    Layout = "_Layout";
+}
+
+<div class="text-center">
+
+    <section id="EC_TOOLS_SECTION_CONTAINER">
+
+        <div id="EC_TOOLS_DIV_CONTAINER">
+
+            <div id="EC_TOOLS_WELCOME_SECTION_CONTAINER">
+                <h1 class="display-4">Welcome To EC Tools</h1>
+                <p>Developer: Mehdi Reysey </p>
+            </div>
+
+            <div class="EC_CARDS_CONTAINER">
+                <div class="EC_CARD_CONTAINER EC-CARD--V">
+                    <div class="EC_CARD_IMAGE_CONTAINER">
+                        <img src="~/media/images/csvToSQL.jpg" alt="CSV TO SQL" />
+                    </div>
+
+                    <div class="EC_CARD_DESCRIPTION_CONTAINER">
+                        <p>
+                            Convert CSV Files To SQL
+                        </p>
+                    </div>
+
+                    <div class="EC_CARD_BUTTON_CONTAINER">
+                        <a asp-area="" asp-page="/ToSQL">CSV TO SQL</a>
+                    </div>
+                </div>
+
+                <div class="EC_CARD_CONTAINER EC-CARD--V">
+                    <div class="EC_CARD_IMAGE_CONTAINER">
+                        <img src="~/media/images/xlsxToSQL.jpg" alt="CSV TO SQL" />
+                    </div>
+
+                    <div class="EC_CARD_DESCRIPTION_CONTAINER">
+                        <p>
+                            Convert XLSX Files To SQL
+                        </p>
+                    </div>
+
+                    <div class="EC_CARD_BUTTON_CONTAINER">
+                        <a asp-area="" asp-page="/xlsxToSQL">XLSX TO SQL</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>

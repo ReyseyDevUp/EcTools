@@ -15,6 +15,10 @@ html {
 
 body {
   margin-bottom: 60px;
+  background: url(/media/images/bg3.jpg);
+  background-origin: border-box;
+  background-position:center;
+  background-size:cover;
 }
 
 
@@ -30,4 +34,226 @@ body {
     display: flex;
     justify-content: center;
     align-items: baseline;
+}
+
+
+#MR_MAIN_TOOLS{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+
+
+#selectWorksheets .select2.select2-container.select2-container--default.select2-container--focus {
+    padding: 0;
+}
+
+#selectWorksheets #select2-single-select-worksheet-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+#selectWorksheets .select2-container {
+    box-sizing: border-box;
+    display: inline-block;
+    margin: 0;
+    position: relative;
+    vertical-align: middle;
+    padding: 0;
+}
+
+#selectWorksheets .select2-selection.select2-selection--single {
+    height: auto;
+    padding: 4px 0px;
+}
+
+#selectWorksheets .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 26px;
+    position: absolute;
+    top: 7px;
+    right: 1px;
+    width: 20px;
+}
+
+div.EC_MAIN_CONTENTS_CONTAINER {
+    height: calc(100vh - 175px);
+    width: 100%;
+    background: linear-gradient(0deg, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0) 300%);
+    padding: 50px;
+    border-radius: 10px;
+    border: 2px solid #fff;
+    overflow-y: auto;
+}
+
+
+.EC_BANNER_CONTAINER {
+    width: 100%;
+    height: auto;
+}
+
+    .EC_BANNER_CONTAINER img {
+        width: inherit;
+    }
+
+#EC_TOOLS_NAV_CONTAINER {
+    background-image: linear-gradient(69deg, rgb(255, 255, 255) 0%, rgba(255, 255, 255, 0.82) 50%);
+}
+
+
+
+    #EC_TOOLS_NAV_LIST_CONTAINER {
+    }
+    #EC_TOOLS_NAV_LIST_CONTAINER ul > li > a {
+        color: #b70000;
+        font-weight: 700;
+    }
+    #EC_TOOLS_NAV_LIST_CONTAINER ul {
+        display: flex;
+        flex-direction:row;
+        gap: 10px;
+    }
+        #EC_TOOLS_NAV_LIST_CONTAINER li {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #b70000;
+            border-radius: 10px;
+        }
+    #EC_TOOLS_NAV_LIST_CONTAINER li:hover {
+        border: 2px solid rgb(255, 77, 1);
+        border-radius: 10px;
+    }
+    #EC_TOOLS_NAV_LIST_CONTAINER a:hover {
+        color:rgb(255, 77, 1);
+    }
+
+
+    .EC_TOOLS_LOGO_CONTAINER {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 50px;
+        gap: 10px;
+    }
+
+    .EC_TOOLS_LOGO_IMAGE_CONTAINER img{
+        height: 50px;
+    }
+
+    .EC_TOOLS_LOGO_TITLE_CONTAINER .EC_TOOLS_LOGO_TITLE {
+        font-size: 2rem;
+        font-weight: 900;
+        color: rgb(255, 77, 1);
+    }
+
+
+
+    /* *** Main *** */
+#EC_TOOLS_SECTION_CONTAINER {
+    min-width: 100%;
+    min-height: calc(100vh - 170px);
+    /*background: background-image: linear-gradient(69deg, #423200 0%, #fda085d1 50%, #423200 300%);*/
+    /*background-color: #ffffffab;*/
+    border-radius: 20px;
+    width: calc(100% - 150px);
+
+    display: flex;
+    justify-content:center;
+    align-items: start;
+}
+#EC_TOOLS_WELCOME_SECTION_CONTAINER{
+    margin-top: 50px;
+}
+
+#EC_TOOLS_DIV_CONTAINER {
+    width: calc(100%);
+    min-height: 200px;
+    /*border: 2px solid #fff;*/
+    border-radius: 20px;
+    /*background: linear-gradient(69deg, rgba(255, 255, 255, 0.86) 0%, rgb(149, 149, 149) 300%);*/
+    margin-top: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.EC_CARDS_CONTAINER{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.EC_CARD_CONTAINER {
+    width: 300px;
+    height: 300px;
+    border: 2px solid #00000080;
+    overflow: hidden;
+    margin: 50px;
+    background-color: #fff;
+    border-radius: 10px;
+}
+.EC_CARD_DESCRIPTION_CONTAINER {
+    display: flex;
+    justify-content: center;
+}
+.EC_CARD_DESCRIPTION_CONTAINER p {
+    display: flex;
+    justify-content: center;
+    width: 200px;
+    font-size:15px;
+    margin: 20px;
+    font-weight: 600;
+}
+.EC_CARD_IMAGE_CONTAINER img {
+    width: 300px;
+    height: 150px;
+    object-fit: cover;
+    margin-top:20px;
+}
+.EC_CARD_BUTTON_CONTAINER{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.EC_CARD_BUTTON_CONTAINER a{
+    text-decoration: none;
+    color: #ff2700;
+    font-weight: 700;
+    border: 2px solid rgb(255, 77, 1);
+    min-width: 200px;
+    padding:10px;
+    display:flex;
+    justify-content:center;
+}
+
+    .EC_CARD_BUTTON_CONTAINER a:hover {
+        color: rgb(255, 93, 64);
+        border: 2px solid rgb(255, 93, 64);
+    }
+
+
+
+
+
+
+.EC_TOSQL_FORM_UPLOAD_BUTTON {
+    padding: 5px 30px;
+    border: 2px solid #00b736;
+    background: #fff;
+    color: #00b736;
+    font-weight: bold;
+    height: 45px;
+    border-radius: 10px;
+    min-width: 150px;
+}
+
+.EC_TOSQL_FORM_UPLOAD_BUTTON:hover {
+    border: 2px solid #007924;
+    color: #007924;
 }
